@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 from tqdm import tqdm
 
 
@@ -128,58 +127,40 @@ for ped in ped_dict:
     traj = np.array(traj)
     ped_dict[ped]["traj"] = traj.copy()
 
-# load boundary 
-boundary = np.loadtxt("./ewap_dataset/seq_eth/boundary.txt")
-boundary_left = []
-boundary_right = []
-for pt in boundary:
-    if pt[1] < 5.0:
-        boundary_left.append(pt)
-    else:
-        boundary_right.append(pt)
-boundary_left = np.array(boundary_left)
-boundary_right = np.array(boundary_right)
-
 # start visualization
-fig, ax = plt.subplots(1, 2, figsize=(16, 7), tight_layout=True)
+fig, ax = plt.subplots(1, 1, tight_layout=True, figsize=(6, 6), dpi=100)
 
-traj_lag = 40
-traj_ahead = 30
-for frame in tqdm(full_frame_list):
-    ax[0].cla()
-    frame_img = cv2.imread("./ewap_dataset/seq_eth/frames/frame{0:08}.png".format(frame))
-    ax[0].imshow(frame_img[...,::-1])
-    
-    ax[1].cla()
-    ax[1].set_xlim(-6.0, 18.0)
-    ax[1].set_ylim(15.0, -10.0)
-    ax[1].set_aspect('equal')
-    ax[1].set_title("Frame: {}".format(frame))
-    ax[1].plot(boundary_left[:,1], boundary_left[:,0], linestyle="-", linewidth=5, color="k")
-    ax[1].plot(boundary_right[:,1], boundary_right[:,0], linestyle="-", linewidth=5, color="k")
-    ax[1].plot(destinations[:,1], destinations[:,0], linestyle="", marker="X", markersize=20, color="k")
+for ped in ped_dict:
+    traj = ped_dict[ped]["traj"]
+    ax.plot(traj[:,1], traj[:,0])
 
-    if frame not in frame_dict:
-        print("missing frame: ", frame)
-        continue
+ax.plot(destinations[:,1], destinations[:,0], linestyle="", marker="x", markersize=10, color="k")
 
-    for ped in frame_dict[frame]["pedestrians"]:
-        state = frame_dict[frame][ped]
-        ax[1].plot(state[1], state[0], linestyle='', marker='o', markersize=15, color='C'+str(ped))
+ax.set_xlim(-6.0, 18.0)
+ax.set_ylim(15.0, -9.0)
+ax.set_aspect("equal")
 
-        curr_frame_idx = np.where(frame == ped_dict[ped]["frames"])[0][0]
-        
-        if curr_frame_idx < traj_lag:
-            traj = ped_dict[ped]["traj"][:curr_frame_idx]
-        else:
-            traj = ped_dict[ped]["traj"][curr_frame_idx-traj_lag:curr_frame_idx]
-        ax[1].plot(traj[:,1], traj[:,0], linestyle=":", linewidth=5, color='C'+str(ped))
 
-        if curr_frame_idx + traj_ahead < len(ped_dict[ped]["frames"]):
-            plan = ped_dict[ped]["traj"][curr_frame_idx: curr_frame_idx+traj_ahead]
-        else:
-            plan = ped_dict[ped]["traj"][curr_frame_idx:]
-        ax[1].plot(plan[:,1], plan[:,0], linestyle="-", linewidth=5, color='C'+str(ped))
+coords = []
 
-    plt.pause(0.01)
-    # plt.savefig("./ewap_dataset/seq_eth/img/eth_parallel_frame{0:08}.png".format(frame))
+def onclick(event):
+    global ix, iy
+    ix, iy = event.xdata, event.ydata
+    print("x={}, y={}".format(ix, iy))
+
+    global coords
+    coords.append((iy, ix))
+
+    if len(coords) == 1000:
+        fig.canvas.mpl_disconnect(cid)
+
+    return coords
+cid = fig.canvas.mpl_connect('button_press_event', onclick)
+
+plt.show()
+plt.close()
+
+coords = np.array(coords)
+np.savetxt("./ewap_dataset/seq_eth/boundary.txt", coords)
+
+print(len(coords))
