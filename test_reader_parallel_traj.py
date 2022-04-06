@@ -141,7 +141,7 @@ boundary_left = np.array(boundary_left)
 boundary_right = np.array(boundary_right)
 
 # start visualization
-fig, ax = plt.subplots(1, 2, figsize=(16, 7), tight_layout=True)
+fig, ax = plt.subplots(1, 2, figsize=(14, 7), gridspec_kw={'width_ratios': [1.38, 1]}, tight_layout=True)
 
 traj_lag = 40
 traj_ahead = 30
@@ -149,15 +149,23 @@ for frame in tqdm(full_frame_list):
     ax[0].cla()
     frame_img = cv2.imread("./ewap_dataset/seq_eth/frames/frame{0:08}.png".format(frame))
     ax[0].imshow(frame_img[...,::-1])
+    ax[0].set_aspect("equal")
+    ax[0].xaxis.set_major_locator(plt.NullLocator())
+    ax[0].yaxis.set_major_locator(plt.NullLocator())
     
     ax[1].cla()
     ax[1].set_xlim(-6.0, 18.0)
     ax[1].set_ylim(15.0, -10.0)
     ax[1].set_aspect('equal')
-    ax[1].set_title("Frame: {}".format(frame))
+    ax[1].set_title("Frame: {}".format(frame), fontsize=20)
     ax[1].plot(boundary_left[:,1], boundary_left[:,0], linestyle="-", linewidth=5, color="k")
     ax[1].plot(boundary_right[:,1], boundary_right[:,0], linestyle="-", linewidth=5, color="k")
     ax[1].plot(destinations[:,1], destinations[:,0], linestyle="", marker="X", markersize=20, color="k")
+    for axis in ['top', 'bottom', 'left', 'right']:
+        ax[1].spines[axis].set_linewidth(5)
+        ax[1].spines[axis].set_zorder(0)
+    ax[1].tick_params(axis='x', labelsize=20, width=5., length=7.)
+    ax[1].tick_params(axis='y', labelsize=20, width=5., length=7.)
 
     if frame not in frame_dict:
         print("missing frame: ", frame)
@@ -165,7 +173,7 @@ for frame in tqdm(full_frame_list):
 
     for ped in frame_dict[frame]["pedestrians"]:
         state = frame_dict[frame][ped]
-        ax[1].plot(state[1], state[0], linestyle='', marker='o', markersize=15, color='C'+str(ped))
+        ax[1].plot(state[1], state[0], linestyle='', marker='o', markersize=15, color='C'+str(ped), label="Ped {}".format(ped))
 
         curr_frame_idx = np.where(frame == ped_dict[ped]["frames"])[0][0]
         
@@ -180,6 +188,7 @@ for frame in tqdm(full_frame_list):
         else:
             plan = ped_dict[ped]["traj"][curr_frame_idx:]
         ax[1].plot(plan[:,1], plan[:,0], linestyle="-", linewidth=5, color='C'+str(ped))
+    ax[1].legend(fontsize=15, loc=4)
 
     plt.pause(0.01)
     # plt.savefig("./ewap_dataset/seq_eth/img/eth_parallel_frame{0:08}.png".format(frame))
