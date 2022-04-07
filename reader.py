@@ -135,6 +135,7 @@ class reader:
         self.boundary_left = np.array(self.boundary_left)
         self.boundary_right = np.array(self.boundary_right)
 
+
     def animate_all(self, savefig=False):
         # start visualization
         fig, ax = plt.subplots(1, 2, figsize=(15.5, 7.5), gridspec_kw={'width_ratios': [1.5, 1]}, tight_layout=True)
@@ -191,3 +192,24 @@ class reader:
                 plt.savefig("./ewap_dataset/seq_eth/img/eth_parallel_frame{0:08}.png".format(frame))
 
         plt.close()
+
+
+    def get_ped_traj(self, ped):
+        traj = self.ped_dict[ped]["traj"]
+        frames = self.ped_dict[ped]["frames"]
+
+        return traj, frames
+
+
+    def config_ax(self, ax):
+        ax.set_xlim(-6.0, 18.0)
+        ax.set_ylim(15.0, -10.0)
+        ax.set_aspect('equal')
+        ax.plot(self.boundary_left[:,1], self.boundary_left[:,0], linestyle="-", linewidth=5, color="k")
+        ax.plot(self.boundary_right[:,1], self.boundary_right[:,0], linestyle="-", linewidth=5, color="k")
+        ax.plot(self.destinations[:,1], self.destinations[:,0], linestyle="", marker="X", markersize=20, color="k")
+        for axis in ['top', 'bottom', 'left', 'right']:
+            ax.spines[axis].set_linewidth(5)
+            ax.spines[axis].set_zorder(0)
+        ax.tick_params(axis='x', labelsize=20, width=5., length=7.)
+        ax.tick_params(axis='y', labelsize=20, width=5., length=7.)
