@@ -189,17 +189,31 @@ class reader:
 
             plt.pause(0.01)
             if savefig == True:
-                plt.savefig("./ewap_dataset/seq_eth/img/eth_parallel_frame{0:08}.png".format(frame))
+                plt.savefig("./ewap_dataset/seq_eth/images/eth_parallel_frame{0:08}.png".format(frame))
 
         plt.close()
 
 
     def get_ped_traj(self, ped):
+        """Get the trajectory and corresponding frames of a pedetrian"""
         traj = self.ped_dict[ped]["traj"]
         frames = self.ped_dict[ped]["frames"]
 
         return traj, frames
 
+    def get_frame_states(self, frame):
+        """Get all pedestrians and their state given a frame"""
+        if frame in self.full_frame_list:
+            peds_idx = self.frame_dict[frame]["pedestrians"]
+            states = []
+            for ped in peds_idx:
+                states.append(self.frame_dict[frame][ped])
+            states = np.array(states)
+
+            return peds_idx, states
+        else:
+            print("The input frame is not processed in the dataset.")
+            print("Check avaiable frame indices at: reader.full_frame_list")
 
     def config_ax(self, ax):
         ax.set_xlim(-6.0, 18.0)

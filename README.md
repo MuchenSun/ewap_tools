@@ -28,6 +28,14 @@ Step 2: Run the example
 
 Feel free to check out the documented source code in `reader.py` to get more information. 
 
+## Data format
+
+The orignal format of the dataset can be found at `ewap_tools/ewap_dataset/README.txt`
+
+The reader code preprocesses the orignal data at `ewap_tools/ewap_dataset/seq_eth/obsmat.txt`, and store the state of a pedestrian at a frame as a 4-vector: [position_x, position_y, velocity_x, velocity_y]
+
+The time step between two frames in the original dataset is 0.4s, we interpolate the original data and the time step between two frames in the reader code is 0.1s.
+
 ## Contact
 
 Muchen Sun (muchen@u.northwestern.edu)
