@@ -190,8 +190,8 @@ class reader:
             plt.pause(0.01)
             if savefig == True:
                 plt.savefig("./ewap_dataset/seq_eth/images/eth_parallel_frame{0:08}.png".format(frame))
-
-        plt.close()
+            else:
+                plt.close()
 
 
     def get_ped_traj(self, ped):
